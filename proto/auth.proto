@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package auth.v1;
+
+option go_package = "github.com/thakur-vijay/adorbit-go/proto/authv1;authv1";
+
+service AuthService {
+  rpc ValidateAccessToken(ValidateAccessTokenRequest)
+      returns (ValidateAccessTokenResponse);
+}
+
+message ValidateAccessTokenRequest {
+  string access_token = 1;
+}
+
+message ValidateAccessTokenResponse {
+  string user_id = 1;
+  string session_id = 2;
+}
