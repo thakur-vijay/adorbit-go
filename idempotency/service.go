@@ -14,6 +14,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 	"sort"
@@ -347,6 +348,7 @@ func (s *Service) Serve(action string, next http.Handler) http.Handler {
 		activeHash := hashes[0]
 		rec, claimed, err := s.repository.Claim(r.Context(), scopeCandidates, activeScope, hashes, activeHash, key, action, owner, s.config.TTL, s.config.ProcessingTTL)
 		if err != nil {
+			log.Printf("IDEMPOTENCY CLAIM FAILED: %T: %v", err, err)
 			if errors.Is(err, errLegacyIndeterminate) || errors.Is(err, errFingerprintIndeterminate) {
 				s.observe(Event{Name: "indeterminate_conflict"})
 				s.writeError(w, http.StatusConflict, "earlier operation has an indeterminate outcome and requires operator resolution")
