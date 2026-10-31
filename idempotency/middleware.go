@@ -6,6 +6,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"log"
 	"net"
 	"net/http"
 	"strings"
@@ -32,6 +33,8 @@ func NewMiddleware() *Middleware { return &Middleware{} }
 // RequireIdempotencyKey validates and stores a UUID Idempotency-Key in context.
 func (m *Middleware) RequireIdempotencyKey(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Printf("Headers: %+v", r.Header)
+		log.Printf("Idempotency-Key: %q", r.Header.Get("Idempotency-Key"))
 		key := strings.TrimSpace(r.Header.Get("Idempotency-Key"))
 		if key == "" {
 			m.writeError(w, http.StatusBadRequest, "Idempotency-Key header is required")
