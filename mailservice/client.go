@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"net"
 	"net/http"
 	"net/url"
@@ -75,6 +76,7 @@ func (c *resendClient) send(ctx context.Context, m Message) error {
 	if readErr != nil || len(responseBody) > maxResponseBytes {
 		return fmt.Errorf("%w: invalid provider response", ErrProvider)
 	}
+	log.Printf("Resend status: %d, response: %s", resp.StatusCode, responseBody)
 	switch {
 	case resp.StatusCode >= 200 && resp.StatusCode < 300:
 		var result struct {
