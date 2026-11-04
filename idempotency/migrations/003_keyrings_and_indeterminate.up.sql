@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS idempotency_key_config (
     active_scope_hash_key_id VARCHAR(64) NOT NULL CHECK (active_scope_hash_key_id ~ '^[A-Za-z0-9_.-]{1,64}$'),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
-INSERT INTO idempotency_key_config(id,active_scope_hash_key_id) VALUES (1,'legacy-v1') ON CONFLICT (id) DO NOTHING;
+INSERT INTO idempotency_key_config(id,active_scope_hash_key_id) VALUES (1,'scope-v1') ON CONFLICT (id) DO NOTHING;
 
 -- Durable resolution audit is committed atomically with deletion of the blocked record.
 CREATE TABLE IF NOT EXISTS idempotency_resolution_audit (
