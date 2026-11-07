@@ -16,6 +16,7 @@ import (
 
 type JWTClaims struct {
 	UserID string `json:"user_id"`
+	Role   string `json:"role"`
 	jwtlib.RegisteredClaims
 }
 
@@ -23,6 +24,15 @@ type JWTMiddleware struct {
 	publicKey *rsa.PublicKey
 	issuer    string
 }
+
+type Principal struct {
+	UserID string
+	Role   string
+}
+
+type contextKey string
+
+const principalKey contextKey = "principal"
 
 func NewJWTMiddleware(publicKeyPEM, issuer string) (*JWTMiddleware, error) {
 	block, _ := pem.Decode([]byte(publicKeyPEM))
@@ -76,12 +86,24 @@ func (m *JWTMiddleware) RequireAuth(next http.Handler) http.Handler {
 		)
 
 		if err != nil || token == nil || !token.Valid ||
-			claims.UserID == "" || claims.Subject != claims.UserID {
+			claims.UserID == "" ||
+			claims.Role == "" ||
+			claims.Subject != claims.UserID {
 			response.Write(w, http.StatusUnauthorized, "authentication failed")
 			return
 		}
 
-		ctx := context.WithValue(r.Context(), userIDKey, claims.UserID)
+		principal := Principal{
+			UserID: claims.UserID,
+			Role:   claims.Role,
+		}
+
+		ctx := context.WithValue(r.Context(), principalKey, principal)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
+}
+
+func GetPrincipal(ctx context.Context) (Principal, bool) {
+	principal, ok := ctx.Value(principalKey).(Principal)
+	return principal, ok
 }
